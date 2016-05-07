@@ -137,18 +137,24 @@ class SolarEyes(object):
         Returns:
             A boolean of True if the synchronisation was successful, or False if an error occurred.
         """
-        if self.check_apis():
-            # Synchronise between SolarWinds and ThousandEyes.
-
-            #se_tests = self.get_se_tests(self.te_api.get_network_tests())
-
-            #if self.create_test("Test", "8.8.8.8"):
-                #Log test creation here. Need to pass in logger.
-
-            return True
-        else:
-            return False
-
+        # if self.check_apis():
+        #     # Synchronise between SolarWinds and ThousandEyes.
+        #
+        #     #se_tests = self.get_se_tests(self.te_api.get_network_tests())
+        #
+        #     # for se_test in se_tests:
+        #     #     print(se_test.name)
+        #
+        #     #if self.create_test("Test", "8.8.8.8"):
+        #         #Log test creation here. Need to pass in logger.
+        #
+        #     self.sw_api.get_path_nodes()
+        #
+        #     return True
+        # else:
+        #     return False
+        self.sw_api.get_path_nodes()
+        return True
 
 class SolarEyesSettings(object):
     """All external settings required by the SolarEyes class.

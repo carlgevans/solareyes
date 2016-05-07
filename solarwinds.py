@@ -16,7 +16,6 @@
 
 import json
 import requests
-import ssl
 from datetime import datetime
 
 
@@ -40,70 +39,57 @@ class Api(object):
     Contains all of the relevant API functions for SolarWinds.
 
     Attributes:
-        api_hostname: A string containing the appropriate API url.
+        api_hostname: A string containing the appropriate API hostname (without https:// etc).
         username: A string containing the SolarWinds username.
         password: A string containing the SolarWinds password.
     """
     def __init__(self, api_hostname=None, username=None, password=None):
-            self.api_hostname = api_hostname
-            self.username = username
-            self.password = password
+            self.api_url = "https://%s:17778/SolarWinds/InformationService/v3/Json/" % api_hostname
+            self.credentials = (username, password)
 
     def status(self):
-        return True
+        status = self.query("SELECT WebsiteID FROM Orion.Websites")
 
-    def get_path_nodes(self):
-
-        swis = SwisClient(self.api_hostname, self.username, self.password)
-
-        print("SWIS URL: " + swis.url)
-        print(ssl.OPENSSL_VERSION)
-        print("Query Test:")
-        results = swis.query("SELECT Uri FROM Orion.Nodes WHERE NodeID=@id", id=1042)
-        uri = results['results'][0]['Uri']
-        print(uri)
-
-
-def _json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-    if isinstance(obj, datetime):
-        serial = obj.isoformat()
-        return serial
-
-
-class SwisClient:
-    def __init__(self, api_hostname, username, password):
-        self.url = "https://%s:17778/SolarWinds/InformationService/v3/Json/" % api_hostname
-        self.credentials = (username, password)
+        if int(status['results'][0]['WebsiteID']) == 1:
+            return True
+        else:
+            return False
 
     def query(self, query, **params):
-        return self._req(
+        return self._request(
                 "POST",
                 "Query",
                 {'query': query, 'parameters': params}).json()
 
     def invoke(self, entity, verb, *args):
-        return self._req(
+        return self._request(
                 "POST",
                 "Invoke/{}/{}".format(entity, verb), args).json()
 
     def create(self, entity, **properties):
-        return self._req(
+        return self._request(
                 "POST",
                 "Create/" + entity, properties).json()
 
     def read(self, uri):
-        return self._req("GET", uri).json()
+        return self._request("GET", uri).json()
 
     def update(self, uri, **properties):
-        self._req("POST", uri, properties)
+        self._request("POST", uri, properties)
 
     def delete(self, uri):
-        self._req("DELETE", uri)
+        self._request("DELETE", uri)
 
-    def _req(self, method, frag, data=None):
-        return requests.request(method, self.url + frag,
-                                data=json.dumps(data, default=_json_serial),
+    def _json_serial(self):
+        """JSON serializer for objects not serializable by default json code.
+        """
+        if isinstance(self, datetime):
+            serial = self.isoformat()
+            return serial
+
+    def _request(self, method, frag, data=None):
+        return requests.request(method, self.api_url + frag,
+                                data=json.dumps(data, default=self._json_serial),
                                 verify=False,
                                 auth=self.credentials,
                                 headers={'Content-Type': 'application/json'})

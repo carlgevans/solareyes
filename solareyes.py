@@ -90,6 +90,20 @@ class SolarEyes(object):
 
         return se_tests
 
+    def get_path_nodes(self):
+        """Get a list of nodes that have been marked as requiring path data.
+
+        Returns:
+            A list of node names and their IP addresses for those nodes requiring path data.
+        """
+        nodes = self.sw_api.query("SELECT NodeName, IPAddress FROM Orion.Nodes WHERE "
+                                  "Nodes.CustomProperties.%s = TRUE" % self.settings.sw_custom_bool)
+
+        for node in nodes['results']:
+            print(node['NodeName'])
+            print(node['IPAddress'])
+            print("---------------")
+
     def check_apis(self):
         """Check the availability of both SolarWinds and ThousandEyes APIs.
 
@@ -103,6 +117,10 @@ class SolarEyes(object):
 
     def create_test(self, test_name=None, test_server=None):
         """Create a test with defaults taken from settings.ini and from passed values.
+
+        Args:
+            test_name: The name of the test as displayed in the ThousandEyes web interface.
+            test_server: The IP address that will be tested in ThousandEyes.
 
         Returns:
             A boolean of True if the creation was successful or False if an error occurred.
@@ -137,24 +155,21 @@ class SolarEyes(object):
         Returns:
             A boolean of True if the synchronisation was successful, or False if an error occurred.
         """
-        # if self.check_apis():
-        #     # Synchronise between SolarWinds and ThousandEyes.
-        #
-        #     #se_tests = self.get_se_tests(self.te_api.get_network_tests())
-        #
-        #     # for se_test in se_tests:
-        #     #     print(se_test.name)
-        #
-        #     #if self.create_test("Test", "8.8.8.8"):
-        #         #Log test creation here. Need to pass in logger.
-        #
-        #     self.sw_api.get_path_nodes()
-        #
-        #     return True
-        # else:
-        #     return False
-        self.sw_api.get_path_nodes()
-        return True
+        if self.check_apis():
+            # Synchronise between SolarWinds and ThousandEyes.
+
+            #se_tests = self.get_se_tests(self.te_api.get_network_tests())
+
+            # for se_test in se_tests:
+            #     print(se_test.)
+
+            #if self.create_test("Test", "8.8.8.8"):
+                #Log test creation here. Need to pass in logger.
+            self.get_path_nodes()
+
+            return True
+        else:
+            return False
 
 class SolarEyesSettings(object):
     """All external settings required by the SolarEyes class.

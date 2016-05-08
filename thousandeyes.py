@@ -321,7 +321,7 @@ class NetworkTest(object):
             if "protocol" in json_test: self.protocol = json_test["protocol"]
             if "port" in json_test: self.port = int(json_test["port"])
             if "savedEvent" in json_test: self.saved_event = int(json_test["savedEvent"])
-            if "server" in json_test: self.server = json_test["server"]
+            if "server" in json_test: self.server = json_test["server"].split(":")[0]
             if "url" in json_test: self.url = json_test["url"]
             if "bandwidthMeasurements" in json_test: self.bandwidth_measurements = bool(json_test["bandwidthMeasurements"])
             if "mtuMeasurements" in json_test: self.mtu_measurements = bool(json_test["mtuMeasurements"])

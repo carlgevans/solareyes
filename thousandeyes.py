@@ -95,7 +95,7 @@ class Api(object):
             A a boolean indicating success (True) or failure (False).
         """
         if test is None:
-            raise errors.Error("[%s.%s] - You must provide a ThousandEyes test id to delete."
+            raise errors.Error("[%s.%s] - You must provide a populated ThousandEyes test instance to create."
                                % (__name__, self.__class__.__name__))
         else:
             response = self.api_request.post("/tests/network/new.json", test.to_json())

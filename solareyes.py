@@ -19,6 +19,7 @@ import solarwinds
 import errors
 import logging
 import configparser
+import functools
 
 """Synchronises nodes in Solarwinds with the path monitoring platform Thousand Eyes.
 
@@ -64,18 +65,17 @@ class SolarEyes(object):
         else:
             return False
 
-    def get_agent_ids(self, agent_list):
+    @functools.lru_cache(maxsize=32)
+    def get_agent_ids(self):
         """Get a list of enterprise agent ids.
 
-        Filter a full list of agents for just the enterprise types and return a list of their ids.
-
-        Args:
-            agent_list: A list of thousandeyes.Agent instances.
+        Retrieve and filter a full list of agents for just the enterprise types and return a list of their ids.
 
         Returns:
             A list of integers representing all enterprise agent ids.
         """
         agent_ids = []
+        agent_list = self.te_api.get_agents()
 
         for agent in agent_list:
             if agent.type == "Enterprise":
@@ -145,7 +145,7 @@ class SolarEyes(object):
             test.port = int(self.settings.te_test_port)
             test.interval = int(self.settings.te_test_interval)
 
-            for agent_id in self.get_agent_ids(self.te_api.get_agents()):
+            for agent_id in self.get_agent_ids():
                 test.agents.append({"agentId": agent_id})
 
             if self.te_api.create_network_test(test):

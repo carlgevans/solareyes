@@ -276,6 +276,7 @@ class SolarEyesSettings(object):
             self.te_test_prefix = te_test_prefix
             self.delete_on_sync = delete_on_sync
 
+
 def main():
     # Read settings file.
     config = configparser.ConfigParser()

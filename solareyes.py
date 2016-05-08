@@ -227,7 +227,18 @@ class SolarEyes(object):
             path_nodes = self.get_path_nodes()
 
             # Delete any tests on ThousandEyes that don't have a node on SolarWinds.
-            self.delete_orphaned_tests(path_nodes, se_tests)
+            if int(self.settings.delete_on_sync) == 1:
+                self.logger.error("[%s] - Delete on sync is enabled. This should be disabled on next sync."
+                                  % self.__class__.__name__)
+
+                # Create a blank dictionary and pass it to the deletion method.
+                blank = {}
+                self.delete_orphaned_tests(blank, se_tests)
+
+                # Get a fresh list of tests.
+                se_tests = self.get_se_tests(self.te_api.get_network_tests())
+            else:
+                self.delete_orphaned_tests(path_nodes, se_tests)
 
             # Create any tests for new nodes on SolarWinds.
             self.create_tests(path_nodes, se_tests)
@@ -247,12 +258,13 @@ class SolarEyesSettings(object):
         te_test_alerts: A string containing the ThousandEyes default test alert requirements.
         te_test_interval: A string containing the ThousandEyes default test interval.
         te_test_prefix: A string containing the ThousandEyes default test name prefix.
+        delete_on_sync: A boolean value that determines if all tests on ThousandEyes should be deleted on next sync.
     """
     def __init__(self, sw_custom_bool=None, te_test_protocol=None, te_test_port=None,
-                 te_test_alerts=None, te_test_interval=None, te_test_prefix=None):
+                 te_test_alerts=None, te_test_interval=None, te_test_prefix=None, delete_on_sync=None):
 
-        if sw_custom_bool is None or te_test_protocol is None or te_test_port is None \
-                or te_test_alerts is None or te_test_interval is None or te_test_prefix is None:
+        if sw_custom_bool is None or te_test_protocol is None or te_test_port is None or te_test_alerts is None \
+                or te_test_interval is None or te_test_prefix is None or delete_on_sync is None:
                     raise errors.Error("[%s.%s] - You must provide all required settings to SolarEyesSettings."
                                        % (__name__, self.__class__.__name__))
         else:
@@ -262,7 +274,7 @@ class SolarEyesSettings(object):
             self.te_test_alerts = te_test_alerts
             self.te_test_interval = te_test_interval
             self.te_test_prefix = te_test_prefix
-
+            self.delete_on_sync = delete_on_sync
 
 def main():
     # Read settings file.
@@ -285,7 +297,8 @@ def main():
                                         settings['te_test_port'],
                                         settings['te_test_alerts'],
                                         settings['te_test_interval'],
-                                        settings['te_test_prefix'])
+                                        settings['te_test_prefix'],
+                                        settings['delete_on_sync'])
 
         # Pass the above API and settings instances to the constructor of SolarEyes.
         solareyes = SolarEyes(te_api, sw_api, se_settings, logging)

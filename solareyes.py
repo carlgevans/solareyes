@@ -20,6 +20,7 @@ import errors
 import logging
 import configparser
 import functools
+import ipaddress
 
 """Synchronises nodes in Solarwinds with the path monitoring platform Thousand Eyes.
 
@@ -167,7 +168,18 @@ class SolarEyes(object):
 
         for test in se_tests:
             if test.server in path_nodes:
-                    ignore_list.append(test.server)
+                self.logger.debug("[%s] - %s (%s) was already present on ThousandEyes."
+                                  % (self.__class__.__name__, test.name, test.server))
+
+                ignore_list.append(test.server)
+
+        # Exclude RFC1918 addresses. The ThousandEyes API is returning code 400 when RFC1918 addresses are used.
+        for ip, name in path_nodes.items():
+            if ipaddress.ip_address(ip).is_private:
+                self.logger.debug("[%s] - %s (%s) was ignored as it was an RFC1918 address."
+                                  % (self.__class__.__name__, name, ip))
+
+                ignore_list.append(ip)
 
         for ip, name in path_nodes.items():
             if ip not in ignore_list:
@@ -180,9 +192,6 @@ class SolarEyes(object):
                 else:
                     self.logger.error("[%s] - An error occurred while attempting to create ThousandEyes test %s (%s)."
                                       % (self.__class__.__name__, name, ip))
-            else:
-                self.logger.debug("[%s] - %s (%s) was already present on ThousandEyes."
-                                  % (self.__class__.__name__, name, ip))
 
     def delete_orphaned_tests(self, path_nodes, se_tests):
         """Delete tests on ThousandEyes that don't have a matching node in SolarWinds.

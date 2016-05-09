@@ -24,7 +24,7 @@ import ipaddress
 
 """Synchronises nodes in Solarwinds with the path monitoring platform Thousand Eyes.
 
-Nodes in Solarwinds that should be created as a test in Thousand Eyes should have a custom boolean property
+Nodes in Solarwinds that should be created as a test in Thousand Eyes must have a custom boolean property
 (configurable in the settings file) set to True.
 """
 __author__ = "Carl Evans"

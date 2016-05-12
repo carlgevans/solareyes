@@ -21,6 +21,7 @@ import logging
 import configparser
 import functools
 import ipaddress
+import os
 
 """Synchronises nodes in Solarwinds with the path monitoring platform Thousand Eyes.
 
@@ -279,8 +280,10 @@ class SolarEyesSettings(object):
 
 def main():
     # Read settings file.
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(script_dir, "settings.ini")
     config = configparser.ConfigParser()
-    config.read('settings.ini')
+    config.read(config_path)
     settings = config['Settings']
 
     # Configure logging.

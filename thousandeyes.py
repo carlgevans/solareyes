@@ -71,7 +71,7 @@ class Api(object):
         Returns:
             A list of thousandeyes.NetworkTest instances.
         """
-        response = self.api_request.get("/tests/network.json")
+        response = self.api_request.get("/tests/agent-to-server.json")
         tests = json.loads(response.text)
         test_list = []
 
@@ -98,7 +98,7 @@ class Api(object):
             raise errors.Error("[%s.%s] - You must provide a populated ThousandEyes test instance to create."
                                % (__name__, self.__class__.__name__))
         else:
-            response = self.api_request.post("/tests/network/new.json", test.to_json())
+            response = self.api_request.post("/tests/agent-to-server/new.json", test.to_json())
 
             if response.status_code == 201:
                 return True
@@ -118,7 +118,7 @@ class Api(object):
             raise errors.Error("[%s.%s] - You must provide a ThousandEyes test id to delete."
                                % (__name__, self.__class__.__name__))
         else:
-            response = self.api_request.delete("/tests/network/%s/delete.json" % test_id)
+            response = self.api_request.delete("/tests/agent-to-server/%s/delete.json" % test_id)
 
             if response.status_code == 204:
                 return True
